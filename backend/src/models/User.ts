@@ -1,20 +1,26 @@
 import mongoose from "mongoose";
 import type { InferSchemaType } from "mongoose";
 
-// interface User{
+// interface UserType{
 //     fullname: string
 //     email: string
 //     password: string
-//     bio: string
+//     bio?: string
 //     profilePic: string
-//     nativeLanguage: string
-//     learningLanguage: string
-//     location: string
-//     isOnboarded: boolean
+//     nativeLanguage?: string
+//     learningLanguage?: string
+//     location?: string
+//     isOnboarded?: boolean
+//     friends?: mongoose.Types.ObjectId[];
 // }
 
 const userSchema = new mongoose.Schema({
-    fullname: {
+    firstName: {
+        type: String,
+        required: true
+    },
+
+    lastName: {
         type: String,
         required: true
     },
@@ -69,7 +75,7 @@ const userSchema = new mongoose.Schema({
     ]
 }, {timestamps: true})
 
-type User = InferSchemaType<typeof userSchema>
+type UserType = InferSchemaType<typeof userSchema>
 
-const UserModel = mongoose.model("User", userSchema)
-export default UserModel
+const User = mongoose.model<UserType>("User", userSchema)
+export default User

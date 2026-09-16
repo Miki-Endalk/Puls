@@ -11,6 +11,8 @@ const envSchema = z.object({
       (val) => val.startsWith("mongodb://") || val.startsWith("mongodb+srv://"),
       { message: "Must be a valid MongoDB connection string starting with mongodb:// or mongodb+srv://" }
     ),
+    JWT_SECRET_KEY: z.string(),
+    NODE_ENV: z.string()
 })
 
 const env = envSchema.parse(process.env)
