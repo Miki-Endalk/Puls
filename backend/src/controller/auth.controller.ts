@@ -131,7 +131,7 @@ export const login = async (
         const isPasswordCorrect = await bcrypt.compare(password, user.password)
 
         if(!isPasswordCorrect) {
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
                 message: "Invalid credentials"
             })
@@ -172,7 +172,19 @@ export const login = async (
 
 export const logout = (
     req: Request, 
-    res: Response
+    res: Response<{success: boolean, message: string}>
 ) => {
-    res.send('Logout')
+    try {
+        res.clearCookie("jwt")
+        res.status(200).json({
+            success: true,
+            message: "User logged out successfully"
+        })
+    } catch (error) {
+        console.log("Error in logout controller:", error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
 }
