@@ -1,5 +1,7 @@
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import type { InferSchemaType } from "mongoose";
+import { string } from "zod";
 
 // interface UserType{
 //     fullname: string
@@ -74,6 +76,22 @@ const userSchema = new mongoose.Schema({
         }
     ]
 }, {timestamps: true})
+
+userSchema.pre("save", async function(next) {
+    if(!this.isModified("password")) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10)
+        this.password = await bcrypt.hash(this.password, salt)
+        next()
+    } catch (error) {
+        if(error instanceof Error) {
+            next(error)
+        } else {
+            next(new Error(String(error)))
+        }
+    }
+})
 
 type UserType = InferSchemaType<typeof userSchema>
 

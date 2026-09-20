@@ -2,6 +2,8 @@ import type { Request, Response } from "express"
 import User from "../models/User.js"
 import jwt from "jsonwebtoken"
 import env from "../config/env.js"
+import { success } from "zod"
+import bcrypt from "bcryptjs"
 
 export const signup = async (
     req: Request<{}, unknown, { firstName: string, lastName: string, email: string, password: string }>,
@@ -96,10 +98,76 @@ export const signup = async (
 }
 
 export const login = async (
-    req: Request, 
-    res: Response
+    req: Request<{}, {}, {email: string, password: string}>, 
+    res: Response<{success: boolean, message?: string, 
+        user?: {
+            _id: string;
+            firstName: string;
+            lastName: string;
+            email: string;
+            profilePic: string
+        }
+    }>
 ) => {
-    res.send('Login')
+    try {
+        const { email, password } = req.body
+
+        if(!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            })
+        }
+
+        const user = await User.findOne({ email })
+
+        if(!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials"
+            })
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password)
+
+        if(!isPasswordCorrect) {
+            return res.status(404).json({
+                success: false,
+                message: "Invalid credentials"
+            })
+        }
+
+        const existingUser = {
+            _id: user._id.toString(),
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            profilePic: user.profilePic
+        }
+
+        const token = jwt.sign({userId: user._id}, env.JWT_SECRET_KEY, {
+            expiresIn: "7d"
+        })
+
+        res.cookie("jwt", token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: true,
+            secure: env.NODE_ENV === "production"
+        })
+
+        res.status(200).json({
+            success: true,
+            message: "User logged in successfully",
+            user: existingUser
+        })
+    } catch (error) {
+        console.log("Error in login controller:", error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
 }
 
 export const logout = (
