@@ -1,20 +1,6 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import type { InferSchemaType } from "mongoose";
-import { string } from "zod";
-
-// interface UserType{
-//     fullname: string
-//     email: string
-//     password: string
-//     bio?: string
-//     profilePic: string
-//     nativeLanguage?: string
-//     learningLanguage?: string
-//     location?: string
-//     isOnboarded?: boolean
-//     friends?: mongoose.Types.ObjectId[];
-// }
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -93,7 +79,9 @@ userSchema.pre("save", async function(next) {
     }
 })
 
-type UserType = InferSchemaType<typeof userSchema>
+export type UserType = InferSchemaType<typeof userSchema>
+
+export type AuthenticatedUser = Omit<UserType, "password">
 
 const User = mongoose.model<UserType>("User", userSchema)
 export default User

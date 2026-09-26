@@ -200,3 +200,14 @@ export const logout = (
         })
     }
 }
+
+export const onboard = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
