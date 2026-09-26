@@ -12,7 +12,9 @@ const envSchema = z.object({
       { message: "Must be a valid MongoDB connection string starting with mongodb:// or mongodb+srv://" }
     ),
     JWT_SECRET_KEY: z.string(),
-    NODE_ENV: z.string()
+    NODE_ENV: z.string(),
+    STREAM_API_KEY: z.string(),
+    STREAM_API_SECRET: z.string()
 })
 
 const env = envSchema.parse(process.env)

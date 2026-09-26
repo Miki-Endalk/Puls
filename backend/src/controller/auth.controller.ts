@@ -2,8 +2,8 @@ import type { Request, Response } from "express"
 import User from "../models/User.js"
 import jwt from "jsonwebtoken"
 import env from "../config/env.js"
-import { success } from "zod"
 import bcrypt from "bcryptjs"
+import { upsertStreamUser } from "../lib/stream.js"
 
 export const signup = async (
     req: Request<{}, unknown, { firstName: string, lastName: string, email: string, password: string }>,
@@ -62,6 +62,8 @@ export const signup = async (
             profilePic: randomAvatar
         })
 
+        const fullName = newUser.firstName + " " + newUser.lastName
+
         const user = {
             _id: newUser._id.toString(),
             firstName: newUser.firstName,
@@ -70,7 +72,17 @@ export const signup = async (
             profilePic: newUser.profilePic
         }
 
-        // TO-DO: Create the user in stream as well
+        // Create the user in Stream
+        try {
+            await upsertStreamUser({
+                id: newUser._id.toString(),
+                name: fullName,
+                image: newUser.profilePic || ""
+            })
+            console.log(`Stream user created for ${fullName}`)
+        } catch (error) {
+            console.log("Error creating Stream user:", error)
+        }
 
         const token = jwt.sign({userId: newUser._id}, env.JWT_SECRET_KEY, {
             expiresIn: "7d"
