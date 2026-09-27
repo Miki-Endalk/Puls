@@ -1,4 +1,4 @@
-import { AuthenticatedUser } from "../models/User.ts";
+import type { AuthenticatedUser } from "../models/User.js";
 
 declare global {
     namespace Express {
