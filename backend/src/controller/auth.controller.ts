@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import env from "../config/env.js";
 import bcrypt from "bcryptjs";
 import { upsertStreamUser } from "../lib/stream.js";
-import { boolean } from "zod";
 
 export const signup = async (
   req: Request<
@@ -285,7 +284,19 @@ export const onboard = async (
       });
     }
 
-    // TO-DO: UPDATE THE USER INFO IN STREAM
+    const fullName = updatedUser.firstName + " " + updatedUser.lastName;
+
+    // UPDATE THE USER INFO IN STREAM
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: fullName,
+        image: updatedUser.profilePic || "",
+      });
+      console.log(`Stream user updated after onboarding for ${fullName}`);
+    } catch (streamError) {
+      console.log("Error updating Stream user during onboarding:", streamError);
+    }
 
     res.status(200).json({
       success: true,
